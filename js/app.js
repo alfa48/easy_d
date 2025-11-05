@@ -16,6 +16,21 @@ const calendarModal = document.getElementById('calendarModal');
 const openCalendarBtn = document.getElementById('openCalendarBtn');
 const closeCalendarModal = document.getElementById('closeCalendarModal');
 
+const timerModal = document.getElementById('timerModal');
+//const closeTimerModal = document.getElementById('closeTimerModal');
+const closeTimerModalBtn = document.getElementById('closeTimerModalBtn');
+
+// Abrir modal do timer
+function openTimerModal() {
+    timerModal.classList.add('active');
+}
+
+// Fechar modal do timer
+//closeTimerModal.addEventListener('click', () => timerModal.classList.remove('active'));
+//closeTimerModalBtn.addEventListener('click', () => timerModal.classList.remove('active'));
+
+
+
 openCalendarBtn.addEventListener('click', () => {
     renderCalendar(); // renderiza calendário atualizado
     calendarModal.classList.add('active');
@@ -27,14 +42,37 @@ closeCalendarModal.addEventListener('click', () => {
 
 
 // Renderiza lista de desafios
+// Renderiza lista de desafios
 function renderChallenges() {
     const challengeListEl = document.getElementById('challengeList');
     challengeListEl.innerHTML = ''; // limpa a lista
 
+    // Lista de classes de cor disponíveis
+    const colorClasses = [
+        'bg-primary',
+        'bg-secondary',
+        'bg-dark',
+        'bg-gray',
+        'bg-success',
+        'bg-warning',
+        'bg-error',
+        'text-primary',
+        'text-secondary',
+        'text-dark',
+        'text-gray',
+        'text-light',
+        'text-success',
+        'text-warning',
+        'text-error'
+    ];
+
     challenges.forEach((ch, idx) => {
+        // Escolher cor aleatória
+        const randomColor = colorClasses[Math.floor(Math.random() * colorClasses.length)];
+
         // Criar chip do desafio
         const chip = document.createElement('div');
-        chip.className = 'chip';
+        chip.className = `chip ${randomColor}`;
         chip.innerHTML = `
             <span>${ch.name} (${ch.time}s)</span>
             <a href="#" class="btn btn-clear" aria-label="Close" role="button"></a>
@@ -56,6 +94,7 @@ function renderChallenges() {
     localStorage.setItem('challenges', JSON.stringify(challenges));
 }
 
+
 // Adicionar campo de passo
 document.getElementById('addStepBtn').addEventListener('click', () => {
     const input = document.createElement('input');
@@ -69,7 +108,7 @@ document.getElementById('addStepBtn').addEventListener('click', () => {
 document.getElementById('addChallengeBtn').addEventListener('click', () => {
     const name = document.getElementById('challengeName').value.trim();
     const time = parseInt(document.getElementById('challengeTime').value);
-    if(!name || !time) return alert('Preencha nome e tempo');
+    if (!name || !time) return alert('Preencha nome e tempo');
 
     const stepInputs = stepsContainer.querySelectorAll('input');
     const steps = Array.from(stepInputs).map(input => input.value).filter(s => s);
@@ -99,7 +138,7 @@ closeModal.addEventListener('click', () => timelineModal.classList.remove('activ
 
 // Sortear desafio aleatório e iniciar direto
 document.getElementById('randomChallengeBtn').addEventListener('click', () => {
-    if(challenges.length === 0) return alert('Adicione pelo menos um desafio!');
+    if (challenges.length === 0) return alert('Adicione pelo menos um desafio!');
     const idx = Math.floor(Math.random() * challenges.length);
     startChallenge(idx);
 });
@@ -110,11 +149,11 @@ function startChallenge(idx) {
     let seconds = ch.time;
     timerDisplay.textContent = `${ch.name} — ${seconds}s`;
 
-    if(timerInterval) clearInterval(timerInterval);
+    if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         seconds--;
         timerDisplay.textContent = `${ch.name} — ${seconds}s`;
-        if(seconds <= 0) {
+        if (seconds <= 0) {
             clearInterval(timerInterval);
             timerDisplay.textContent = `✅ ${ch.name} concluído!`;
 
@@ -127,29 +166,58 @@ function startChallenge(idx) {
     }, 1000);
 }
 
-// Renderizar calendário simples
+/// Renderizar calendário com dias da semana e destaque no dia atual
 function renderCalendar() {
     const calendarEl = document.getElementById('calendar');
     calendarEl.innerHTML = '';
+
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
+    const today = now.getDate();
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
 
-    for(let i = 0; i < firstDay; i++) {
+    const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    // --- Cabeçalho com nome do mês e ano ---
+    const header = document.createElement('div');
+    header.className = 'calendar-header';
+    header.textContent = `${monthNames[month]} ${year}`;
+    calendarEl.appendChild(header);
+
+    // --- Nomes dos dias da semana ---
+    dayNames.forEach(name => {
+        const dayNameEl = document.createElement('div');
+        dayNameEl.className = 'day-name';
+        dayNameEl.textContent = name;
+        calendarEl.appendChild(dayNameEl);
+    });
+
+    // --- Espaços vazios antes do primeiro dia ---
+    for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) {
         const empty = document.createElement('div');
-        empty.className = 'day';
+        empty.className = 'day empty';
         calendarEl.appendChild(empty);
     }
 
-    for(let d = 1; d <= lastDate; d++) {
+    // --- Dias do mês ---
+    for (let d = 1; d <= lastDate; d++) {
         const td = document.createElement('div');
         td.className = 'day';
         const dateStr = new Date(year, month, d).toISOString().split('T')[0];
         td.textContent = d;
 
-        if(completedDays[dateStr]) {
+        // Dia atual
+        if (d === today) td.classList.add('today');
+
+        // Dias completados
+        if (completedDays[dateStr]) {
             td.classList.add('completed');
             const span = document.createElement('span');
             span.textContent = completedDays[dateStr];
@@ -159,6 +227,8 @@ function renderCalendar() {
         calendarEl.appendChild(td);
     }
 }
+
+
 
 // Abrir modal com timeline
 function openModal(idx) {
@@ -178,7 +248,7 @@ function openModal(idx) {
         const icon = document.createElement('a');
         icon.className = 'timeline-icon';
         icon.href = `#timeline-step-${stepIdx}`;
-        if(stepIdx > 0) icon.classList.add('icon-lg'); // exemplo para ícones maiores
+        if (stepIdx > 0) icon.classList.add('icon-lg'); // exemplo para ícones maiores
         const iTag = document.createElement('i');
         iTag.className = 'icon icon-check';
         icon.appendChild(iTag);
@@ -195,6 +265,86 @@ function openModal(idx) {
 
     timelineModal.classList.add('active');
 }
+
+function startChallenge(idx) {
+    const ch = challenges[idx];
+    let seconds = ch.time;
+
+    // Abrir modal
+    openTimerModal();
+    const timerDisplay = document.getElementById('timerDisplay');
+
+    timerDisplay.textContent = `${ch.name} — ${seconds}s`;
+
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        seconds--;
+        timerDisplay.textContent = `${ch.name} — ${seconds}s`;
+        if (seconds <= 0) {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = `✅ ${ch.name} concluído!`;
+            // Marcar no calendário
+            const today = new Date().toISOString().split('T')[0];
+            completedDays[today] = ch.name;
+            localStorage.setItem('completedDays', JSON.stringify(completedDays));
+            renderCalendar();
+        }
+    }, 1000);
+}
+
+
+function openTimerModal(challenge) {
+    const timerModal = document.getElementById('timerModal');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timelineContainer = document.getElementById('timerModalTimeline');
+
+    // Abrir modal
+    timerModal.classList.add('active');
+
+    // Reset timer display
+    timerDisplay.textContent = `${challenge.name} — ${challenge.time}s`;
+
+    // Preencher timeline se existir
+    timelineContainer.innerHTML = '';
+    if (challenge.steps && challenge.steps.length > 0) {
+        challenge.steps.forEach((step, idx) => {
+            const li = document.createElement('li');
+            li.textContent = step;
+            timelineContainer.appendChild(li);
+        });
+    }
+}
+
+
+function startChallenge(idx) {
+    const ch = challenges[idx];
+    let seconds = ch.time;
+
+    // Abrir modal do timer com timeline
+    openTimerModal(ch);
+
+    // Atualizar timer a cada segundo
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        seconds--;
+        document.getElementById('timerDisplay').textContent = `${ch.name} — ${seconds}s`;
+
+        if (seconds <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('timerDisplay').textContent = `✅ ${ch.name} concluído!`;
+
+            // Marcar no calendário
+            const today = new Date().toISOString().split('T')[0];
+            completedDays[today] = ch.name;
+            localStorage.setItem('completedDays', JSON.stringify(completedDays));
+            renderCalendar();
+
+            // Fechar modal ao final do desafio
+            document.getElementById('timerModal').classList.remove('active');
+        }
+    }, 1000);
+}
+
 
 
 // Inicialização

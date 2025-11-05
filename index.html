@@ -1,77 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Desafios</title>
-<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
-<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
-<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Desafios</title>
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-<div class="container">
+  <div class="container">
     <h3 class="text-center">Easy desafios</h3>
 
-    <div class="form-group">
-        <label for="challengeName">nome do desafio:</label>
-        <input type="text" class="form-input" id="challengeName" placeholder="Ex: Alongar os braços">
+    <div class="form-group p-2">
 
-        <label for="challengeTime">tempo (segundos):</label>
-        <input type="number" class="form-input" id="challengeTime" placeholder="60">
+      <!-- Nome -->
+      <label class="form-label" for="challengeName">desafio</label>
+      <input type="text" class="form-input" id="challengeName" placeholder="Ex: Alongar os braços" maxlength="60">
 
-        <div id="stepsContainer"></div>
-        
-        <button class="btn btn-secondary btn-block" id="addStepBtn">adicionar passo</button>
+      <!-- Tempo -->
+      <label class="form-label mt-2" for="challengeTime">
+        duração (em segundos)
+        <small class="text-gray">máx. 10800s (3h)</small>
+      </label>
+      <input type="number" class="form-input" id="challengeTime" placeholder="Ex: 300 = 5 minutos" min="10" max="10800"
+        step="10">
 
-        <button class="btn btn-primary btn-block" id="addChallengeBtn">adicionar desafio</button>
+      <!-- Container de passos -->
+      <div id="stepsContainer" class="mt-2"></div>
+
+      <!-- Botão de adicionar passo -->
+      <button class="btn btn-secondary btn-block mt-2" id="addStepBtn">
+        adicionar passo
+      </button>
+
+      <!-- Botão principal -->
+      <button class="btn btn-primary btn-block mt-2" id="addChallengeBtn">
+        salvar desafio
+      </button>
+
     </div>
 
-    <button class="btn btn-success btn-block" id="randomChallengeBtn">desafiar</button>
-        <button class="btn btn-info btn-block" id="openCalendarBtn">Ver Calendário</button>
+    <!-- Ações gerais -->
+    <div class="p-2">
+      <!-- FAB flutuante -->
+      <button class="btn btn-success fab" id="randomChallengeBtn" title="Iniciar desafio">
+        🎯
+      </button>
+    </div>
 
-        <h5>desafios:</h5>
 
-  <div>
-  <div class="form-autocomplete-input form-input" id="challengeList"></div>
-</div>
+    <h5>desafios:</h5>
+
+    <div id="challengeList"></div>
 
 
-    <div class="timer" id="timerDisplay"></div>
+    <div class="p-2">
+      <button class="btn btn-info btn-block" id="openCalendarBtn">
+        Calendário
+      </button>
+    </div>
 
     <!-- Modal para timeline -->
-<div class="modal" id="timelineModal">
-  <a class="modal-overlay" aria-label="Close"></a>
+    <div class="modal" id="timelineModal">
+      <a class="modal-overlay" aria-label="Close"></a>
+      <div class="modal-container">
+        <div class="modal-header">
+          <a class="btn btn-clear float-right" aria-label="Close" id="closeModal"></a>
+          <div class="modal-title" id="modalTitle">desafio</div>
+        </div>
+        <div class="modal-body">
+          <div id="modalTimeline" class="timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal do calendário -->
+    <div class="modal" id="calendarModal">
+      <a class="modal-overlay" aria-label="Close"></a>
+      <div class="modal-container">
+        <div class="modal-header">
+          <a class="btn btn-clear float-right" aria-label="Close" id="closeCalendarModal"></a>
+          <div class="modal-title">Calendário de Desafios</div>
+        </div>
+        <div class="modal-body">
+          <div id="calendar" class="calendar"></div>
+        </div>
+      </div>
+    </div>
+
+<!-- Modal do Timer + Timeline -->
+<div class="modal" id="timerModal">
+  <!-- Overlay não clicável para fechar -->
+  <a class="modal-overlay" aria-label="Timer em andamento" style="pointer-events: none;"></a>
+
   <div class="modal-container">
     <div class="modal-header">
-      <a class="btn btn-clear float-right" aria-label="Close" id="closeModal"></a>
-      <div class="modal-title" id="modalTitle">desafio</div>
+      <div class="modal-title" id="timerModalTitle">Desafio em andamento</div>
     </div>
-    <div class="modal-body">
-      <div id="modalTimeline" class="timeline"></div>
+
+    <div class="modal-body text-center">
+      <!-- Timer grande -->
+      <div class="timer mb-3" id="timerDisplay" style="font-size:2em; font-weight:bold;">
+        00:00
+      </div>
+
+      <!-- Timeline do desafio -->
+      <div id="timerModalTimeline" class="timeline"></div>
     </div>
   </div>
 </div>
 
-<!-- Modal do calendário -->
-<div class="modal" id="calendarModal">
-  <a class="modal-overlay" aria-label="Close"></a>
-  <div class="modal-container">
-    <div class="modal-header">
-      <a class="btn btn-clear float-right" aria-label="Close" id="closeCalendarModal"></a>
-      <div class="modal-title">Calendário de Desafios</div>
-    </div>
-    <div class="modal-body">
-      <div id="calendar" class="calendar"></div>
-    </div>
+
+
   </div>
-</div>
 
-
-
-</div>
-
-<script src="js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
+
 </html>
