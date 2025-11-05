@@ -1,0 +1,64 @@
+body { 
+    padding: 20px; 
+    background: #f8f8f8; 
+    font-family: 'Ubuntu', sans-serif; 
+}
+
+.container { max-width: 600px; margin: auto; }
+
+.challenge-list { margin-top: 20px; }
+
+.challenge-item { 
+    padding: 8px; 
+    border-bottom: 1px solid #ddd; 
+    cursor: pointer;
+}
+
+.timer { 
+    font-size: 2em; 
+    text-align: center; 
+    margin-top: 20px; 
+}
+
+.timeline li::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    background: #4CAF50;
+    border-radius: 50%;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.day { 
+    width: 100%; 
+    min-height: 50px; 
+    padding: 5px; 
+    text-align: center; 
+    background: #fff; 
+    border-radius: 4px; 
+    border: 1px solid #ccc; 
+    font-size: 0.9em; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+}
+
+.completed { 
+    background: #4CAF50; 
+    color: white; 
+    border-color: #4CAF50; 
+}
+
+.completed span { 
+    font-size: 0.7em; 
+    display: block; 
+}
